@@ -1,7 +1,7 @@
-### Laravel Restful API
+## Laravel Restful API
 I was searching for basic auth based RESTful application on Laravel or Lumen. I was trying to learn React & Redux. Couldn't find any.  Was lazy enough to build a new one. As nothing did help me, have to write one for myself. 
 
-#### Installation
+### Installation
 This is a dockerized application. Do the following
 
 Not Mandatory but good to have: 
