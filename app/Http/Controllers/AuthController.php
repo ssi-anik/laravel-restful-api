@@ -7,6 +7,7 @@ use App\Models\Token;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Intervention\Image\Facades\Image;
 
 class AuthController extends Controller
@@ -45,6 +46,8 @@ class AuthController extends Controller
 			'expires_in'    => Carbon::now()
 									 ->addDays(env('TOKEN_VALIDATION_IN_DAYS')),
 		]);
+		// cache access token for 5 min with user id as value
+		Cache::put($token->access_token, $user->id, 5);
 
 		return response()->json([
 			'user_id'       => $user->id,
@@ -79,6 +82,9 @@ class AuthController extends Controller
 			'expires_in'    => Carbon::now()
 									 ->addDays(env('TOKEN_VALIDATION_IN_DAYS')),
 		]);
+
+		// cache access token for 5 min with user id as value
+		Cache::put($token->access_token, $user->id, 5);
 
 		return response()->json([
 			'user_id'       => $user->id,
