@@ -1,6 +1,6 @@
 <?php namespace App\Http\Controllers;
 
-use App\Helpers\Logger;
+use App\Helpers\Helper;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegistrationRequest;
 use App\Repositories\TokenRepository;
@@ -8,7 +8,6 @@ use App\Repositories\UserRepository;
 use App\Services\AuthService;
 use App\Services\CacheService;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 use Intervention\Image\Facades\Image;
 
 class AuthController extends Controller
@@ -32,7 +31,7 @@ class AuthController extends Controller
 
 		$user = $userRepository->saveNewUser($form);
 		// write request to log file
-		Logger::logRequest($form, $request->route()->getName());
+		Helper::logRequest($form, $request->route()->getName());
 		// generate access token
 		$token = $tokenRepository->saveNewToken($user);
 		// cache access token for 5 min with user id as value
@@ -55,16 +54,15 @@ class AuthController extends Controller
 			'deleted_at' => null,
 		];
 
-		$isSuccessful = $authService->check($credentials);
+		$user = $authService->check($credentials);
 
-		if (false === $isSuccessful) {
+		if (false === $user) {
 			return response()->json([
 				'error'   => true,
 				'message' => 'Email or Password mismatch',
 			], 400);
 		}
 
-		$user = Auth::user();
 		// save access token
 		$token = $tokenRepository->saveNewToken($user);
 		// cache access token for 5 min with user id as value
@@ -77,6 +75,6 @@ class AuthController extends Controller
 			'access_token'  => $token->access_token,
 			'refresh_token' => $token->refresh_token,
 			'expires_in'    => $token->expires_in->toDateTimeString(),
-		], 201);
+		], 200);
 	}
 }

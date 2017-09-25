@@ -1,6 +1,6 @@
 <?php namespace App\Helpers;
 
-class Logger
+class Helper
 {
 	public static function logRequest (array $request, $name) {
 		$output = json_encode([ $name => $request ]) . PHP_EOL;

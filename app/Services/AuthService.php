@@ -11,6 +11,6 @@ class AuthService
 	}
 
 	public function check ($credentials) {
-		return $this->auth->attempt($credentials);
+		return $this->auth->attempt($credentials) ? $this->auth->user() : false;
 	}
 }
