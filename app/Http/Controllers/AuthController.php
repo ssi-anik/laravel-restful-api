@@ -3,29 +3,22 @@
 use App\Helpers\Logger;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegistrationRequest;
-use App\Models\Token;
-use App\Models\User;
-use Carbon\Carbon;
+use App\Repositories\TokenRepository;
+use App\Repositories\UserRepository;
+use App\Services\AuthService;
+use App\Services\CacheService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Intervention\Image\Facades\Image;
 
 class AuthController extends Controller
 {
-	public function postRegistration (RegistrationRequest $request) {
+	public function postRegistration (RegistrationRequest $request, UserRepository $userRepository, TokenRepository $tokenRepository, CacheService $cacheService) {
 		$form = [
 			'name'     => trim($request->get('name')),
 			'email'    => trim($request->get('email')),
 			'password' => $request->get('password'),
 		];
-		// save user
-		$user = new User();
-		foreach ($form as $field => $item) {
-			$user->$field = $item;
-		}
-		// write request to log file
-		Logger::logRequest($request->all(), $request->route()
-													->getName());
 
 		// check if profile picture exits
 		if ($request->hasFile('profile_picture')) {
@@ -34,20 +27,16 @@ class AuthController extends Controller
 			$image = Image::make($request->file('profile_picture'));
 			$image->resize(30, 30);
 			$image->save(storage_path($imagePath));
-			$user->profile_picture = $imagePath;
+			$form['profile_picture'] = $imagePath;
 		}
-		$user->save();
 
+		$user = $userRepository->saveNewUser($form);
+		// write request to log file
+		Logger::logRequest($form, $request->route()->getName());
 		// generate access token
-		$token = Token::create([
-			'user_id'       => $user->id,
-			'access_token'  => Logger::generateUniqueString(),
-			'refresh_token' => Logger::generateUniqueString(),
-			'expires_in'    => Carbon::now()
-									 ->addDays(env('TOKEN_VALIDATION_IN_DAYS')),
-		]);
+		$token = $tokenRepository->saveNewToken($user);
 		// cache access token for 5 min with user id as value
-		Cache::put($token->access_token, $user->id, 5);
+		$cacheService->insertAccessTokenToCache($token->access_token, $token->user_id, 5);
 
 		return response()->json([
 			'user_id'       => $user->id,
@@ -59,12 +48,14 @@ class AuthController extends Controller
 		], 201);
 	}
 
-	public function postLogin (LoginRequest $request) {
-		$isSuccessful = Auth::attempt([
+	public function postLogin (LoginRequest $request, TokenRepository $tokenRepository, AuthService $authService, CacheService $cacheService) {
+		$credentials = [
 			'email'      => $request->get('email'),
 			'password'   => $request->get('password'),
 			'deleted_at' => null,
-		]);
+		];
+
+		$isSuccessful = $authService->check($credentials);
 
 		if (false === $isSuccessful) {
 			return response()->json([
@@ -74,17 +65,10 @@ class AuthController extends Controller
 		}
 
 		$user = Auth::user();
-
-		$token = Token::create([
-			'user_id'       => $user->id,
-			'access_token'  => Logger::generateUniqueString(),
-			'refresh_token' => Logger::generateUniqueString(),
-			'expires_in'    => Carbon::now()
-									 ->addDays(env('TOKEN_VALIDATION_IN_DAYS')),
-		]);
-
+		// save access token
+		$token = $tokenRepository->saveNewToken($user);
 		// cache access token for 5 min with user id as value
-		Cache::put($token->access_token, $user->id, 5);
+		$cacheService->insertAccessTokenToCache($token->access_token, $token->user_id, 5);
 
 		return response()->json([
 			'user_id'       => $user->id,
