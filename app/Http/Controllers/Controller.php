@@ -11,12 +11,12 @@ class Controller extends BaseController
 {
 	use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
-	protected function respondSuccess ($data, $statusCode = 200) {
+	public function respondSuccess ($data, $statusCode = 200) {
 		return $this->respond([ 'data' => $data ], $statusCode);
 	}
 
-	protected function respondError ($data, $statusCode = 400) {
-		return $this->respond([ 'error' => true, 'data' => $data ], $statusCode);
+	public function respondError ($data, $statusCode = 400) {
+		return $this->respond([ 'error' => true, 'causes' => $data ], $statusCode);
 	}
 
 	private function respond ($data, $statusCode) {
