@@ -2,12 +2,12 @@
 
 Route::group([ 'middleware' => 'guest' ], function () {
 	Route::post('registration', [
-		'as'   => 'registration.post',
+		'as'   => 'post.registration',
 		'uses' => 'AuthController@postRegistration',
 	]);
 
 	Route::post('login', [
-		'as'   => 'login.post',
+		'as'   => 'post.login',
 		'uses' => 'AuthController@postLogin',
 	]);
 });
