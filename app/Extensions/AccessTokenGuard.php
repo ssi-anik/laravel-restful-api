@@ -9,6 +9,7 @@ class AccessTokenGuard implements Guard
 	private $inputKey = '';
 	private $storageKey = '';
 	private $request;
+
 	public function __construct (UserProvider $provider, Request $request, $configuration) {
 		$this->provider = $provider;
 		$this->request = $request;
@@ -17,6 +18,7 @@ class AccessTokenGuard implements Guard
 		// key to check in database
 		$this->storageKey = isset($configuration['storage_key']) ? $configuration['storage_key'] : 'access_token';
 	}
+
 	public function user () {
 		if (!is_null($this->user)) {
 			return $this->user;

@@ -45,6 +45,10 @@ return [
 			'driver'   => 'token',
 			'provider' => 'users',
 		],
+
+		'token' => [
+			'driver' => 'access_token'
+		]
 	],
 
 	/*
