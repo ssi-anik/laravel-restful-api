@@ -1,5 +1,6 @@
 <?php namespace App\Providers;
 
+use App\Extensions\AccessTokenGuard;
 use App\Extensions\TokenToUserProvider;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Auth;
