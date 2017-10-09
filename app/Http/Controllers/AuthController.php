@@ -7,6 +7,7 @@ use App\Repositories\TokenRepository;
 use App\Repositories\UserRepository;
 use App\Services\AuthService;
 use App\Services\CacheService;
+use Illuminate\Support\Facades\Auth;
 use Intervention\Image\Facades\Image;
 
 class AuthController extends Controller
@@ -46,22 +47,22 @@ class AuthController extends Controller
 		], 201);
 	}
 
-	public function postLogin (LoginRequest $request, TokenRepository $tokenRepository, AuthService $authService, CacheService $cacheService) {
+	public function postLogin (LoginRequest $request, TokenRepository $tokenRepository, CacheService $cacheService) {
 		$credentials = [
 			'email'      => $request->get('email'),
 			'password'   => $request->get('password'),
 			'deleted_at' => null,
 		];
 
-		$user = $authService->check($credentials);
-
-		if (false === $user) {
+		$isAccepted = Auth::attempt($credentials);
+		if (false === $isAccepted) {
 			return response()->json([
 				'error'   => true,
 				'message' => 'Email or Password mismatch',
 			], 400);
 		}
 
+		$user = Auth::user();
 		// save access token
 		$token = $tokenRepository->saveNewToken($user);
 		// cache access token for 5 min with user id as value
