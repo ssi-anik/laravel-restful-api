@@ -2,10 +2,12 @@
 
 use App\Extensions\Helper;
 use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RefreshTokenRequest;
 use App\Http\Requests\RegistrationRequest;
 use App\Repositories\TokenRepository;
 use App\Repositories\UserRepository;
 use App\Services\CacheService;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Intervention\Image\Facades\Image;
 
@@ -32,7 +34,7 @@ class AuthController extends Controller
 		// write request to log file
 		Helper::logRequest($form, $request->route()->getName());
 		// generate access token
-		$token = $tokenRepository->saveNewToken($user);
+		$token = $tokenRepository->saveNewToken($user->id);
 		// cache access token for 5 min with user id as value
 		$cacheService->insertAccessTokenToCache($token->access_token, $token->user_id, 5);
 
@@ -60,7 +62,7 @@ class AuthController extends Controller
 
 		$user = Auth::user();
 		// save access token
-		$token = $tokenRepository->saveNewToken($user);
+		$token = $tokenRepository->saveNewToken($user->id);
 		// cache access token for 5 min with user id as value
 		$cacheService->insertAccessTokenToCache($token->access_token, $token->user_id, 5);
 
@@ -71,6 +73,29 @@ class AuthController extends Controller
 			'access_token'  => $token->access_token,
 			'refresh_token' => $token->refresh_token,
 			'expires_in'    => $token->expires_in->toDateTimeString(),
+		], 200);
+	}
+
+	public function postRefreshToken (RefreshTokenRequest $request, TokenRepository $tokenRepository, CacheService $cacheService) {
+		$accessToken = $request->bearerToken() ?: $request->get('access_token');
+		$refreshToken = $request->get('refresh_token');
+
+		$user = Auth::user();
+		$token = $tokenRepository->matchAccessTokenWithRefreshToken($accessToken, $refreshToken, $user->id);
+
+		if (!$token || Carbon::now()->diffInSeconds(new Carbon($token->expires_in), false) < 0) {
+			return $this->respondError([ 'token' => 'Invalid Token' ]);
+		}
+
+		$newToken = $tokenRepository->saveNewToken($user->id);
+		$cacheService->insertAccessTokenToCache($newToken->access_token, $newToken->user_id, 5);
+		return $this->respondSuccess([
+			'user_id'       => $user->id,
+			'name'          => $user->name,
+			'email'         => $user->email,
+			'access_token'  => $newToken->access_token,
+			'refresh_token' => $newToken->refresh_token,
+			'expires_in'    => $newToken->expires_in->toDateTimeString(),
 		], 200);
 	}
 }

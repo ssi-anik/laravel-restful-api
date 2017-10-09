@@ -13,12 +13,19 @@ class TokenRepository
 		$this->model = $token;
 	}
 
-	public function saveNewToken (User $user) {
+	public function saveNewToken ($userId) {
 		return Token::create([
-			'user_id'       => $user->id,
+			'user_id'       => $userId,
 			'access_token'  => Helper::generateUniqueString(),
 			'refresh_token' => Helper::generateUniqueString(),
 			'expires_in'    => Carbon::now()->addDays(env('TOKEN_VALIDATION_IN_DAYS', 3)),
 		]);
+	}
+
+	public function matchAccessTokenWithRefreshToken ($accessToken, $refreshToken, $userId) {
+		return $this->model->where('access_token', $accessToken)
+						   ->where('refresh_token', $refreshToken)
+						   ->where('user_id', $userId)
+						   ->first();
 	}
 }
