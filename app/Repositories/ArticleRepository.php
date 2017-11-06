@@ -1,6 +1,7 @@
 <?php namespace App\Repositories;
 
 use App\Models\Article;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
 class ArticleRepository
@@ -38,5 +39,13 @@ class ArticleRepository
 		}
 
 		return $this->article->with($relations)->where('slug', $slug)->first();
+	}
+
+	public function getChunkOfArticles ($perPage, $searchQuery) {
+		return $this->article->setPerPage($perPage)
+							 ->search($searchQuery)
+							 ->with('user', 'tags')
+							 ->paginate()
+							 ->appends([ 'per_page' => $this->article->getPerPage(), 'search' => $searchQuery ]);
 	}
 }

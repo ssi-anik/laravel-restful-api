@@ -5,12 +5,29 @@ use App\Repositories\ArticleRepository;
 use App\Repositories\TagRepository;
 use App\Services\CacheService;
 use App\Transformers\ArticleTransformer;
+use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
 class ArticleController extends Controller
 {
-	public function index () {
-		//
+	public function index (ArticleRepository $articleRepository, ArticleTransformer $articleTransformer, Request $request, CacheService $cacheService) {
+		$perPage = $request->get('per_page', 0);
+		if (0 > $perPage || 100 < $perPage) {
+			$perPage = 0;
+		}
+		$page = $request->get('page') ?: 1;
+
+		$searchQuery = $request->get('query');
+		// check if the articles for the page ( assuming first page as 1, with same pagination & searchQuery
+		if (!($articles = $cacheService->getArticleSetFromCache($page, $perPage, $searchQuery))) {
+			$articles = $articleRepository->getChunkOfArticles($perPage, $searchQuery);
+			// if there is nothing then there will be nothing to insert
+			if ($articles->count()) {
+				$cacheService->insertArticleChunkToCache($articles, $page, $perPage, $searchQuery);
+			}
+		}
+
+		return $this->respondSuccess($articleTransformer->transformCollection($articles, 'transform', 'articles'));
 	}
 
 	public function store (CreateArticleRequest $request, ArticleRepository $articleRepository, TagRepository $tagRepository, ArticleTransformer $transformer, CacheService $cacheService) {

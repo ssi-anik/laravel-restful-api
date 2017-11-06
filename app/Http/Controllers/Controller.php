@@ -12,7 +12,8 @@ class Controller extends BaseController
 	use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
 
 	public function respondSuccess ($data, $statusCode = 200) {
-		return $this->respond([ 'data' => $data ], $statusCode);
+		$response = array_key_exists('data', $data) ? $data : [ 'data' => $data ];
+		return $this->respond($response, $statusCode);
 	}
 
 	public function respondError ($data, $statusCode = 400) {

@@ -18,5 +18,13 @@ Route::group([ 'middleware' => 'auth:token' ], function () {
 		'uses' => 'AuthController@postRefreshToken',
 	]);
 
-	Route::resource('article', 'ArticleController', [ 'except' => 'create', 'edit' ]);
+	Route::resource('article', 'ArticleController', [ 'except' => 'create', 'edit', 'index' ]);
+});
+
+// routes those don't require any guest or auth middleware
+Route::group([ 'middleware' => [] ], function () {
+	Route::get('article', [
+		'as'   => 'article.index',
+		'uses' => 'ArticleController@index',
+	]);
 });
