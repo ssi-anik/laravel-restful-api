@@ -41,11 +41,23 @@ class ArticleController extends Controller
 		return $this->respondSuccess($transformer->transform($article), 201);
 	}
 
-	public function show (ArticleTransformer $articleTransformer, ArticleRepository $articleRepository, $id) {
-		if (!($article = $articleRepository->fetchAnArticleById($id))) {
-			return $this->respondError([ 'article' => 'Not found!' ], 404);
+	public function show (ArticleTransformer $articleTransformer, ArticleRepository $articleRepository, CacheService $cacheService, $slug) {
+		// check if article is in the cache or not
+		if ($article = $cacheService->checkIfArticleExists($slug)) {
+			// relations are not loaded
+			$article->load([ 'user', 'tags' ]);
+		} else {
+			// load from database
+			$article = $articleRepository->fetchAnArticleBySlug($slug);
+			// no article found
+			if (!$article) {
+				return $this->respondError([ 'article' => 'Not found!' ], 404);
+			}
+			// just only to save the the model, not relations
+			$cacheService->insertArticleToCache($article->fresh());
 		}
 
+		// return the article
 		return $this->respondSuccess($articleTransformer->transform($article));
 	}
 

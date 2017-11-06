@@ -31,7 +31,7 @@ class ArticleRepository
 		return $article->tags()->attach($tags);
 	}
 
-	public function fetchAnArticleById ($id) {
-		return $this->article->with('user', 'tags')->find($id);
+	public function fetchAnArticleBySlug ($slug) {
+		return $this->article->with('user', 'tags')->where('slug', $slug)->first();
 	}
 }

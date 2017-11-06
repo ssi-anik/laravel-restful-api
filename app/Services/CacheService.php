@@ -36,4 +36,9 @@ class CacheService
 		$this->cache->setPrefix($prefix ?: $this->articlePrefix);
 		$this->cache->put($article->slug, $article, $rememberFor);
 	}
+
+	public function checkIfArticleExists ($articleSlug, $prefix = null) {
+		$this->cache->setPrefix($prefix ?: $this->articlePrefix);
+		return $this->cache->get($articleSlug);
+	}
 }
