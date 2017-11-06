@@ -42,6 +42,11 @@ class CacheService
 		$this->cache->put($article->slug, $article, $rememberFor);
 	}
 
+	public function removeArticleFromCache ($articleSlug, $prefix = null) {
+		$this->cache->setPrefix($prefix ?: $this->articlePrefix);
+		$this->cache->forget($articleSlug);
+	}
+
 	public function checkIfArticleExists ($articleSlug, $prefix = null) {
 		$this->cache->setPrefix($prefix ?: $this->articlePrefix);
 
@@ -50,17 +55,20 @@ class CacheService
 
 	public function insertArticleChunkToCache ($articles, $page, $perPage, $searchQuery, $rememberFor = 5, $prefix = null) {
 		$this->cache->setPrefix($prefix ?: $this->articleSetPrefix);
-		$this->cache->put($this->articleSetKeyBuilder($page, $perPage, $searchQuery), $articles, $rememberFor);
+		$this->cache->tags($this->articleSetPrefix)
+					->put($this->articleSetKeyBuilder($page, $perPage, $searchQuery), $articles, $rememberFor);
 	}
 
 	public function getArticleSetFromCache ($page, $perPage, $searchQuery, $prefix = null) {
 		$this->cache->setPrefix($prefix ?: $this->articleSetPrefix);
 
-		return $this->cache->get($this->articleSetKeyBuilder($page, $perPage, $searchQuery));
+		return $this->cache->tags($this->articleSetPrefix)
+						   ->get($this->articleSetKeyBuilder($page, $perPage, $searchQuery));
 	}
 
-	public function removeArticleFromCache ($articleSlug, $prefix = null) {
-		$this->cache->setPrefix($prefix ?: $this->articlePrefix);
-		$this->cache->forget($articleSlug);
+	public function flushArticleSetFromCache ($prefix = null) {
+		$this->cache->setPrefix($prefix ?: $this->articleSetPrefix);
+
+		return $this->cache->tags($this->articleSetPrefix)->flush();
 	}
 }

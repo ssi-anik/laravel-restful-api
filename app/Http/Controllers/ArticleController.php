@@ -97,6 +97,8 @@ class ArticleController extends Controller
 		$articleRepository->deleteAnArticle($article);
 		// remove from cache
 		$cacheService->removeArticleFromCache($article->slug);
+		// remove previously built cache
+		$cacheService->flushArticleSetFromCache();
 
 		return $this->respondSuccess([ 'article' => $article->id ]);
 	}
