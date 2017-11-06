@@ -5,6 +5,7 @@ class ArticleTransformer extends BaseTransformer
 	public function transform ($article) {
 		$data = [
 			'id'         => $article->id,
+			'slug'       => $article->slug,
 			'title'      => $article->title,
 			'content'    => $article->content,
 			'created_at' => $article->created_at->toDateTimeString(),
