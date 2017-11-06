@@ -48,7 +48,7 @@ class ArticleController extends Controller
 			$article->load([ 'user', 'tags' ]);
 		} else {
 			// load from database
-			$article = $articleRepository->fetchAnArticleBySlug($slug);
+			$article = $articleRepository->fetchAnArticleBySlug($slug, [ 'user', 'tags' ]);
 			// no article found
 			if (!$article) {
 				return $this->respondError([ 'article' => 'Not found!' ], 404);

@@ -31,7 +31,12 @@ class ArticleRepository
 		return $article->tags()->attach($tags);
 	}
 
-	public function fetchAnArticleBySlug ($slug) {
-		return $this->article->with('user', 'tags')->where('slug', $slug)->first();
+	public function fetchAnArticleBySlug ($slug, $relations = []) {
+		// making sure relations are provided as array tho as parameters work
+		if (!is_array($relations)) {
+			$relations = [ $relations ];
+		}
+
+		return $this->article->with($relations)->where('slug', $slug)->first();
 	}
 }
