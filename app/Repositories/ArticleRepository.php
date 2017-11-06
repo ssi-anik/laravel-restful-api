@@ -48,4 +48,8 @@ class ArticleRepository
 							 ->paginate()
 							 ->appends([ 'per_page' => $this->article->getPerPage(), 'search' => $searchQuery ]);
 	}
+
+	public function deleteAnArticle (Article $article) {
+		return $article->delete();
+	}
 }

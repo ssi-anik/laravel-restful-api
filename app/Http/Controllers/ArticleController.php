@@ -86,7 +86,18 @@ class ArticleController extends Controller
 		//
 	}
 
-	public function destroy ($id) {
-		//
+	public function destroy (ArticleRepository $articleRepository, CacheService $cacheService, $slug) {
+		$article = $articleRepository->fetchAnArticleBySlug($slug);
+		if (!$article) {
+			return $this->respondError([ 'article' => 'Not found!' ], 404);
+		}
+		if (!auth()->user()->can('delete', $article)) {
+			return $this->respondError([ 'permission' => "You don't have authorization to delete the article." ], 403);
+		}
+		$articleRepository->deleteAnArticle($article);
+		// remove from cache
+		$cacheService->removeArticleFromCache($article->slug);
+
+		return $this->respondSuccess([ 'article' => $article->id ]);
 	}
 }

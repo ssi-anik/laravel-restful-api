@@ -33,6 +33,7 @@ class CacheService
 
 	public function removeAccessToken (string $accessToken, $prefix = null) {
 		$this->cache->setPrefix($prefix ?: $this->accessTokenPrefix);
+
 		return $this->cache->forget($accessToken);
 	}
 
@@ -56,5 +57,10 @@ class CacheService
 		$this->cache->setPrefix($prefix ?: $this->articleSetPrefix);
 
 		return $this->cache->get($this->articleSetKeyBuilder($page, $perPage, $searchQuery));
+	}
+
+	public function removeArticleFromCache ($articleSlug, $prefix = null) {
+		$this->cache->setPrefix($prefix ?: $this->articlePrefix);
+		$this->cache->forget($articleSlug);
 	}
 }
