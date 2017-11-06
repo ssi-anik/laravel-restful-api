@@ -2,7 +2,9 @@
 
 use App\Http\Controllers\Controller;
 use Exception;
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Validation\UnauthorizedException;
 use Illuminate\Validation\ValidationException;
 
 class Handler extends ExceptionHandler
@@ -32,8 +34,16 @@ class Handler extends ExceptionHandler
 					$data[$key] = $value[0];
 				}
 				break;
+			case AuthenticationException::class:
+				$statusCode = 401;
+				$data = [ 'access' => 'Unauthenticated' ];
+				break;
+			case UnauthorizedException::class:
+				$statusCode = 403;
+				$data = [ 'access' => 'Unauthorized access' ];
+				break;
 			default:
-				$data = [$exception->getMessage()];
+				$data = [ 'data' => $exception->getMessage() ];
 				break;
 		}
 
