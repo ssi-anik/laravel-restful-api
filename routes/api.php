@@ -17,4 +17,6 @@ Route::group([ 'middleware' => 'auth:token' ], function () {
 		'as'   => 'post.refreshToken',
 		'uses' => 'AuthController@postRefreshToken',
 	]);
+
+	Route::resource('article', 'ArticleController', [ 'except' => 'create', 'edit' ]);
 });
