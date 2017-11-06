@@ -10,16 +10,17 @@ class ArticleTransformer extends BaseTransformer
 			'created_at' => $article->created_at->toDateTimeString(),
 		];
 
-		if ($article->relationLoaded('user')) {
-			$user = [
-				'user_id' => $article->user->id,
-				'name'    => $article->user->name,
-			];
-			$data = array_merge($user, $data);
+		if ($article->relationLoaded('tags')) {
+			$data = array_merge($data, [ 'tags' => $article->tags->pluck('content') ]);
 		}
 
-		if ($article->relationLoaded('tags')) {
-			$data = array_merge($data, $article->tags->pluck('content', 'id'));
+		if ($article->relationLoaded('user')) {
+			$user = [
+				'id'   => $article->user->id,
+				'name' => $article->user->name,
+			];
+
+			$data = array_merge($data, [ 'user' => $user ]);
 		}
 
 		return $data;

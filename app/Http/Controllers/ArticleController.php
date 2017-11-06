@@ -38,8 +38,12 @@ class ArticleController extends Controller
 		return $this->respondSuccess($transformer->transform($article), 201);
 	}
 
-	public function show ($id) {
-		//
+	public function show (ArticleTransformer $articleTransformer, ArticleRepository $articleRepository, $id) {
+		if (!($article = $articleRepository->fetchAnArticleById($id))) {
+			return $this->respondError([ 'article' => 'Not found!' ], 404);
+		}
+
+		return $this->respondSuccess($articleTransformer->transform($article));
 	}
 
 	public function edit ($id) {

@@ -25,4 +25,8 @@ class ArticleRepository
 	public function insertArticleTagToPivot (Article $article, Collection $tags) {
 		return $article->tags()->attach($tags);
 	}
+
+	public function fetchAnArticleById ($id) {
+		return $this->article->with('user', 'tags')->find($id);
+	}
 }
