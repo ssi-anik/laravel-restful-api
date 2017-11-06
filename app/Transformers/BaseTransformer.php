@@ -9,13 +9,13 @@ abstract class BaseTransformer
 {
 	abstract public function transform ($object);
 
-	public function transformCollection ($collection, $callback = 'transform', ...$arguments) {
-		if ( !( $collection instanceof Collection ) && !( $collection instanceof Paginator ) && !($collection instanceof SupportCollection)) {
+	public function transformCollection ($collection, $callback = 'transform', $dataKey = 'data', ...$arguments) {
+		if (!($collection instanceof Collection) && !($collection instanceof Paginator) && !($collection instanceof SupportCollection)) {
 			throw new TransformerException();
 		}
 		$data = [];
 		$results = $this->transformCollectionRaw($collection, $callback, ...$arguments);
-		$data = array_merge($data, [ 'data' => $results->toArray() ]);
+		$data = array_merge($data, [ $dataKey => $results->toArray() ]);
 		if ($collection instanceof Paginator) {
 			$data['paginate'] = [
 				'current_page'  => $collection->currentPage(),
@@ -37,7 +37,7 @@ abstract class BaseTransformer
 	}
 
 	public function transformCollectionRaw ($collection, $callback = 'transform', ...$arguments) {
-		if ( !( $collection instanceof Collection ) && !( $collection instanceof Paginator ) && !($collection instanceof SupportCollection)) {
+		if (!($collection instanceof Collection) && !($collection instanceof Paginator) && !($collection instanceof SupportCollection)) {
 			throw new TransformerException();
 		}
 
