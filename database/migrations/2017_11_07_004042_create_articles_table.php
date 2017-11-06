@@ -13,6 +13,7 @@ class CreateArticlesTable extends Migration
 			$table->string('slug',50)->unique();
 			$table->string('title', 100);
 			$table->text('content');
+			$table->softDeletes();
 			$table->timestamps();
 		});
 	}
