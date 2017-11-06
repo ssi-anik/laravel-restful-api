@@ -1,32 +1,20 @@
-<?php
+<?php namespace App\Providers;
 
-namespace App\Providers;
-
-use Illuminate\Support\Facades\Event;
+use App\Events\RefreshTokenEvent;
+use App\Listeners\RefreshTokenEventListener;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
 {
-    /**
-     * The event listener mappings for the application.
-     *
-     * @var array
-     */
-    protected $listen = [
-        'App\Events\Event' => [
-            'App\Listeners\EventListener',
-        ],
-    ];
+	protected $listen = [
+		RefreshTokenEvent::class => [
+			RefreshTokenEventListener::class,
+		],
+	];
 
-    /**
-     * Register any events for your application.
-     *
-     * @return void
-     */
-    public function boot()
-    {
-        parent::boot();
+	public function boot () {
+		parent::boot();
 
-        //
-    }
+		//
+	}
 }

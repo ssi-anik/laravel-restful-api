@@ -1,5 +1,6 @@
 <?php namespace App\Http\Controllers;
 
+use App\Events\RefreshTokenEvent;
 use App\Extensions\Helper;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RefreshTokenRequest;
@@ -88,6 +89,7 @@ class AuthController extends Controller
 		}
 
 		$newToken = $tokenRepository->saveNewToken($user->id);
+		event(new RefreshTokenEvent($token));
 		$cacheService->insertAccessTokenToCache($newToken->access_token, $newToken->user_id, 5);
 		return $this->respondSuccess([
 			'user_id'       => $user->id,
