@@ -33,11 +33,7 @@ class CacheService
 
 	public function removeAccessToken (string $accessToken, $prefix = null) {
 		$this->cache->setPrefix($prefix ?: $this->accessTokenPrefix);
-		if ($this->checkIfAccessTokenExists($accessToken, $prefix)) {
-			$this->cache->forget($accessToken);
-		}
-
-		return true;
+		return $this->cache->forget($accessToken);
 	}
 
 	public function insertArticleToCache ($article, $rememberFor = 5, $prefix = null) {
