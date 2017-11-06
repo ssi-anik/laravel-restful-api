@@ -6,6 +6,7 @@ class CacheService
 {
 	private $cache = null;
 	private $accessTokenPrefix = 'AT';
+	private $articlePrefix = 'ART';
 
 	public function __construct (CacheManager $cache) {
 		$this->cache = $cache;
@@ -29,5 +30,10 @@ class CacheService
 		}
 
 		return true;
+	}
+
+	public function insertArticleToCache ($article, $rememberFor = 5, $prefix = null) {
+		$this->cache->setPrefix($prefix ?: $this->articlePrefix);
+		$this->cache->put($article->slug, $article, $rememberFor);
 	}
 }

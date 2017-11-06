@@ -11,11 +11,16 @@ class ArticleRepository
 		$this->article = $article;
 	}
 
+	public function generateArticleSlug ($string) {
+		return sprintf("%s-%s", substr(str_slug($string), 0, 40), str_random(10));
+	}
+
 	public function storeArticle ($articleData, $userId) {
 		$article = $this->article->newInstance();
 		foreach ($articleData as $key => $value) {
 			$article->{$key} = $value;
 		}
+		$article->slug = $this->generateArticleSlug($articleData['title']);
 		$article->user_id = $userId;
 		$article->save();
 

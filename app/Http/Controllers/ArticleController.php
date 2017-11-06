@@ -3,6 +3,7 @@
 use App\Http\Requests\CreateArticleRequest;
 use App\Repositories\ArticleRepository;
 use App\Repositories\TagRepository;
+use App\Services\CacheService;
 use App\Transformers\ArticleTransformer;
 use Illuminate\Support\Str;
 
@@ -12,7 +13,7 @@ class ArticleController extends Controller
 		//
 	}
 
-	public function store (CreateArticleRequest $request, ArticleRepository $articleRepository, TagRepository $tagRepository, ArticleTransformer $transformer) {
+	public function store (CreateArticleRequest $request, ArticleRepository $articleRepository, TagRepository $tagRepository, ArticleTransformer $transformer, CacheService $cacheService) {
 		$articleData = [ 'title' => $request->get('title'), 'content' => $request->get('content') ];
 		// lower the contents
 		// then generate slug
@@ -34,6 +35,8 @@ class ArticleController extends Controller
 		} catch (\Exception $exception) {
 			throw new \Exception("Cannot create article.");
 		}
+
+		$cacheService->insertArticleToCache($article, 10);
 
 		return $this->respondSuccess($transformer->transform($article), 201);
 	}
