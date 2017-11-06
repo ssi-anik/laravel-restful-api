@@ -2,7 +2,6 @@
 
 use App\Extensions\Helper;
 use App\Models\Token;
-use App\Models\User;
 use Carbon\Carbon;
 
 class TokenRepository
@@ -27,5 +26,10 @@ class TokenRepository
 						   ->where('refresh_token', $refreshToken)
 						   ->where('user_id', $userId)
 						   ->first();
+	}
+
+	public function invalidateAccessToken (Token $token) {
+		$token->update([ 'expires_in' => Carbon::now()->subDays(1) ]);
+		return true;
 	}
 }

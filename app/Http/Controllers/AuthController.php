@@ -82,15 +82,16 @@ class AuthController extends Controller
 		$refreshToken = $request->get('refresh_token');
 
 		$user = Auth::user();
-		$token = $tokenRepository->matchAccessTokenWithRefreshToken($accessToken, $refreshToken, $user->id);
+		$previousAccessToken = $tokenRepository->matchAccessTokenWithRefreshToken($accessToken, $refreshToken, $user->id);
 
-		if (!$token || Carbon::now()->diffInSeconds(new Carbon($token->expires_in), false) < 0) {
+		if (!$previousAccessToken || Carbon::now()->gt(new Carbon($previousAccessToken->expires_in))) {
 			return $this->respondError([ 'token' => 'Invalid Token' ]);
 		}
 
 		$newToken = $tokenRepository->saveNewToken($user->id);
-		event(new RefreshTokenEvent($token));
+		event(new RefreshTokenEvent($previousAccessToken, $newToken));
 		$cacheService->insertAccessTokenToCache($newToken->access_token, $newToken->user_id, 5);
+
 		return $this->respondSuccess([
 			'user_id'       => $user->id,
 			'name'          => $user->name,

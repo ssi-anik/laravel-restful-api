@@ -18,6 +18,16 @@ class CacheService
 
 	public function checkIfAccessTokenExists ($accessToken, $prefix = null) {
 		$this->cache->setPrefix($prefix ?: $this->accessTokenPrefix);
+
 		return $this->cache->get($accessToken);
+	}
+
+	public function removeAccessToken (string $accessToken, $prefix = null) {
+		$this->cache->setPrefix($prefix ?: $this->accessTokenPrefix);
+		if ($this->checkIfAccessTokenExists($accessToken, $prefix)) {
+			$this->cache->forget($accessToken);
+		}
+
+		return true;
 	}
 }

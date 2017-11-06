@@ -10,8 +10,11 @@ class RefreshTokenEvent
 {
 	use Dispatchable, InteractsWithSockets, SerializesModels;
 
-	public function __construct (Token $token) {
-		$this->token = $token;
+	public $previousAccessToken, $newAccessToken;
+
+	public function __construct (Token $previousAccessToken, Token $newAccessToken) {
+		$this->previousAccessToken = $previousAccessToken;
+		$this->newAccessToken = $newAccessToken;
 	}
 
 	public function broadcastOn () {

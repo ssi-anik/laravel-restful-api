@@ -1,14 +1,21 @@
 <?php namespace App\Listeners;
 
-use Carbon\Carbon;
+use App\Repositories\TokenRepository;
+use App\Services\CacheService;
 
 class RefreshTokenEventListener
 {
-	public function __construct () {
+	private $tokenRepository, $cacheService;
+
+	public function __construct (TokenRepository $tokenRepository, CacheService $cacheService) {
+		$this->tokenRepository = $tokenRepository;
+		$this->cacheService = $cacheService;
 	}
 
 	public function handle ($event) {
 		// invalidate the given access token
-		$event->token->update([ 'expires_in' => Carbon::now()->subDays(1) ]);
+		$this->tokenRepository->invalidateAccessToken($event->previousAccessToken);
+		// invalidate cache from cache.
+		$this->cacheService->removeAccessToken($event->previousAccessToken->access_token);
 	}
 }
