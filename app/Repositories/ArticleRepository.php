@@ -13,7 +13,7 @@ class ArticleRepository
 	}
 
 	public function generateArticleSlug ($string) {
-		return sprintf("%s-%s", substr(str_slug($string), 0, 40), str_random(10));
+		return sprintf("%s-%s", substr(str_slug($string), 0, 39), str_random(10));
 	}
 
 	public function storeArticle ($articleData, $userId) {
