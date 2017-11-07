@@ -1,6 +1,7 @@
 <?php namespace App\Http\Controllers;
 
 use App\Http\Requests\CreateArticleRequest;
+use App\Http\Requests\UpdateArticleRequest;
 use App\Repositories\ArticleRepository;
 use App\Repositories\TagRepository;
 use App\Services\CacheService;
@@ -78,12 +79,86 @@ class ArticleController extends Controller
 		return $this->respondSuccess($articleTransformer->transform($article));
 	}
 
-	public function edit ($id) {
-		//
-	}
+	public function update (UpdateArticleRequest $request, ArticleRepository $articleRepository, TagRepository $tagRepository, CacheService $cacheService, ArticleTransformer $articleTransformer, $slug) {
+		$article = $cacheService->checkIfArticleExists($slug) ?: $articleRepository->fetchAnArticleBySlug($slug);
+		if (!$article) {
+			return $this->respondError([ 'article' => 'Not found!' ], 404);
+		}
 
-	public function update (Request $request, $id) {
-		//
+		if (!auth()->user()->can('update', $article)) {
+			return $this->respondError([ 'permission' => "You don't have authorization to delete the article." ], 403);
+		}
+
+		// as the article can be updated, remove from the cache
+		$cacheService->removeArticleFromCache($article->slug);
+
+		// needed to load tags to check if there is any update
+		if (!$article->relationLoaded('tags')) {
+			$article->load('tags');
+		}
+
+		$sentData = [];
+		$sentTags = collect();
+		if ($request->has('title')) {
+			$sentData['title'] = $request->get('title');
+		}
+
+		if ($request->has('content')) {
+			$sentData['content'] = $request->get('content');
+		}
+
+		if ($request->has('tags')) {
+			$sentTags = collect($request->get('tags'))->map(function ($item) {
+				return Str::lower($item);
+			})->map(function ($item) {
+				return str_slug($item);
+			});
+		}
+		// check if it is an identical operation or not
+		$changeInArticle = [];
+		// new different tags to insert
+		$changeInTags = [];
+
+		if ($sentData) {
+			foreach ($sentData as $key => $value) {
+				if ($article->{$key} != $value) {
+					$changeInArticle[$key] = $value;
+				}
+			}
+		}
+
+		if ($sentTags) {
+			$changeInTags = $sentTags->union($article->tags->pluck('content'));
+		}
+
+		if ($changeInTags->count() == 0 && !$changeInArticle) {
+			throw new \Exception("Identical update operation is not valid.");
+		}
+
+		try {
+			$article = app('db')->transaction(function () use ($article, $changeInArticle, $changeInTags, $sentTags, $articleRepository, $tagRepository) {
+				if ($changeInArticle) {
+					$article = $articleRepository->updateArticleChange($article, $changeInArticle);
+				}
+
+				if ($changeInTags->count()) {
+					$newTags = $tagRepository->storeUnavailableTags($sentTags, auth()->user()->id);
+					if ($newTags->count()) {
+						$articleRepository->updateArticleTagsToPivotTable($article, $newTags);
+					}
+				}
+
+				return $article;
+			});
+			$article->load('tags');
+		} catch (\Exception $exception) {
+			throw new \Exception("Cannot create article.");
+		}
+
+		// insert the new article to cache
+		$cacheService->insertArticleToCache($article);
+
+		return $this->respondSuccess($articleTransformer->transform($article));
 	}
 
 	public function destroy (ArticleRepository $articleRepository, CacheService $cacheService, $slug) {

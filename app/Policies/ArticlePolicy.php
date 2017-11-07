@@ -12,6 +12,13 @@ class ArticlePolicy
 		//
 	}
 
+	public function update (User $user, Article $article) {
+		// check if user is super admin or not
+		// todo: check this.
+		// check if user is the article creator
+		return $user->id == $article->user_id;
+	}
+
 	public function delete (User $user, Article $article) {
 		// check if user is super admin or not
 		// todo: check this.

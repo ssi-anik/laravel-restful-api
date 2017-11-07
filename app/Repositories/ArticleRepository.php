@@ -28,8 +28,24 @@ class ArticleRepository
 		return $article;
 	}
 
+	public function updateArticleChange (Article $article, $articleData) {
+		foreach ($articleData as $field => $value) {
+			$article->{$field} = $value;
+			if ($field == 'title') {
+				$article->slug = $this->generateArticleSlug($value);
+			}
+		}
+		$article->save();
+
+		return $article;
+	}
+
 	public function insertArticleTagToPivot (Article $article, Collection $tags) {
 		return $article->tags()->attach($tags);
+	}
+
+	public function updateArticleTagsToPivotTable (Article $article, Collection $tags) {
+		return $article->tags()->sync($tags);
 	}
 
 	public function fetchAnArticleBySlug ($slug, $relations = []) {
