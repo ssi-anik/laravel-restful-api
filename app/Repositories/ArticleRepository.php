@@ -65,6 +65,17 @@ class ArticleRepository
 							 ->appends([ 'per_page' => $this->article->getPerPage(), 'search' => $searchQuery ]);
 	}
 
+	public function getChunkOfArticlesByUser ($userId, $perPage, $searchQuery) {
+		return $this->article->setPerPage($perPage)
+							 ->where('user_id', $userId)
+							 ->where(function($query) use($searchQuery){
+								 $query->search($searchQuery);
+							 })
+							 ->with('user', 'tags')
+							 ->paginate()
+							 ->appends([ 'per_page' => $this->article->getPerPage(), 'search' => $searchQuery ]);
+	}
+
 	public function deleteAnArticle (Article $article) {
 		return $article->delete();
 	}

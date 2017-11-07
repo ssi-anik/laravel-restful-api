@@ -24,4 +24,5 @@ Route::group([ 'middleware' => 'auth:token' ], function () {
 // routes those don't require any guest or auth middleware
 Route::group([ 'middleware' => [] ], function () {
 	Route::resource('article', 'ArticleController', [ 'only' => [ 'index', 'show', ] ]);
+	Route::resource('user.article', 'UserArticleController', ['only' => ['index']]);
 });

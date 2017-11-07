@@ -15,4 +15,8 @@ class UserRepository
     {
         return $this->model->create($data);
     }
+
+	public function checkIfUserExists ($userId) {
+		return $this->model->find($userId);
+    }
 }
