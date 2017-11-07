@@ -25,4 +25,5 @@ Route::group([ 'middleware' => 'auth:token' ], function () {
 Route::group([ 'middleware' => [] ], function () {
 	Route::resource('article', 'ArticleController', [ 'only' => [ 'index', 'show', ] ]);
 	Route::resource('user.article', 'UserArticleController', ['only' => ['index']]);
+	Route::resource('tag.article', 'TagArticleController', ['only' => ['index']]);
 });

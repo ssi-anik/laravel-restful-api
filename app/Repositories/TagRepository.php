@@ -25,4 +25,8 @@ class TagRepository
 
 		return $this->tag->whereIn('content', $tagData->toArray())->get();
 	}
+
+	public function checkIfTagExists ($tagSlug) {
+		return $this->tag->where('content', $tagSlug)->first();
+	}
 }

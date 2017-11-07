@@ -1,7 +1,6 @@
 <?php namespace App\Repositories;
 
 use App\Models\Article;
-use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 
 class ArticleRepository
@@ -18,7 +17,7 @@ class ArticleRepository
 
 	public function storeArticle ($articleData, $userId) {
 		$article = $this->article->newInstance();
-		foreach ($articleData as $key => $value) {
+		foreach ( $articleData as $key => $value ) {
 			$article->{$key} = $value;
 		}
 		$article->slug = $this->generateArticleSlug($articleData['title']);
@@ -29,7 +28,7 @@ class ArticleRepository
 	}
 
 	public function updateArticleChange (Article $article, $articleData) {
-		foreach ($articleData as $field => $value) {
+		foreach ( $articleData as $field => $value ) {
 			$article->{$field} = $value;
 			if ($field == 'title') {
 				$article->slug = $this->generateArticleSlug($value);
@@ -50,7 +49,7 @@ class ArticleRepository
 
 	public function fetchAnArticleBySlug ($slug, $relations = []) {
 		// making sure relations are provided as array tho as parameters work
-		if (!is_array($relations)) {
+		if ( !is_array($relations)) {
 			$relations = [ $relations ];
 		}
 
@@ -68,12 +67,23 @@ class ArticleRepository
 	public function getChunkOfArticlesByUser ($userId, $perPage, $searchQuery) {
 		return $this->article->setPerPage($perPage)
 							 ->where('user_id', $userId)
-							 ->where(function($query) use($searchQuery){
+							 ->where(function ($query) use ($searchQuery) {
 								 $query->search($searchQuery);
 							 })
 							 ->with('user', 'tags')
 							 ->paginate()
 							 ->appends([ 'per_page' => $this->article->getPerPage(), 'search' => $searchQuery ]);
+	}
+
+	public function getChunkOfArticlesByTag ($tagId, $perPage, $searchQuery) {
+		return $this->article->setPerPage($perPage)->whereHas('tags', function ($query) use ($tagId) {
+			$query->where('tag_id', $tagId);
+		})->where(function ($query) use ($searchQuery) {
+			$query->search($searchQuery);
+		})->with('user', 'tags')->paginate()->appends([
+			'per_page' => $this->article->getPerPage(),
+			'search'   => $searchQuery,
+		]);
 	}
 
 	public function deleteAnArticle (Article $article) {
