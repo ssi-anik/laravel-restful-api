@@ -1,4 +1,4 @@
-FROM php:7.1.1-fpm
+FROM php:7.1.8-fpm
 
 RUN apt-get update && apt-get install -y libmcrypt-dev curl nano zip libpng-dev
 
