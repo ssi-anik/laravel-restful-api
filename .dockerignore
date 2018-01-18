@@ -1,0 +1,11 @@
+#.env
+.git
+#deploy/app
+#deploy/env
+docker
+.idea
+.DS_Store
+public/uploads/
+storage/logs/laravel.log
+docker-compose.yml
+docker-compose.yml.example
