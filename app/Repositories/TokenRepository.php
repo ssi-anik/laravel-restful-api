@@ -32,4 +32,8 @@ class TokenRepository
 		$token->update([ 'expires_in' => Carbon::now()->subDays(1) ]);
 		return true;
 	}
+
+    public function validateAccessToken ($accessToken) {
+        return $this->model->where('access_token', $accessToken)->where('expires_in', '>', Carbon::now())->first();
+    }
 }

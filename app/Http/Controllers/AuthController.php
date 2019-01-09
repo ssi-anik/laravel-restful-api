@@ -9,6 +9,7 @@ use App\Repositories\TokenRepository;
 use App\Repositories\UserRepository;
 use App\Services\CacheService;
 use Carbon\Carbon;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Intervention\Image\Facades\Image;
 
@@ -101,4 +102,23 @@ class AuthController extends Controller
 			'expires_in'    => $newToken->expires_in->toDateTimeString(),
 		], 200);
 	}
+
+    public function validateToken (Request $request, TokenRepository $tokenRepository) {
+        $userAccessToken = $request->bearerToken() ?: $request->get('access_token');
+
+        $user = Auth::user();
+        $token = $tokenRepository->validateAccessToken($userAccessToken);
+
+        if (!$token) {
+            return $this->respondError([ 'token' => 'Invalid Token' ], 400);
+        }
+
+        return $this->respondSuccess([
+            'user_id'      => $user->id,
+            'name'         => $user->name,
+            'email'        => $user->email,
+            'access_token' => $token->access_token,
+            'expires_in'   => $token->expires_in,
+        ], 200);
+    }
 }

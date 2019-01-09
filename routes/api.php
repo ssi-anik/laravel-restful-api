@@ -18,6 +18,11 @@ Route::group([ 'middleware' => 'auth:token' ], function () {
 		'uses' => 'AuthController@postRefreshToken',
 	]);
 
+    Route::post('validate', [
+        'as'   => 'post.validateToken',
+        'uses' => 'AuthController@validateToken',
+    ]);
+
 	Route::resource('article', 'ArticleController', [ 'only' => [ 'store', 'update', 'destroy' ] ]);
 });
 
