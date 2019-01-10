@@ -10,7 +10,7 @@ class CreateArticlesTable extends Migration
 		Schema::create('articles', function (Blueprint $table) {
 			$table->increments('id');
 			$table->integer('user_id');
-			$table->string('slug',50)->unique();
+			$table->string('slug',250)->unique();
 			$table->string('title', 100);
 			$table->text('content');
 			$table->softDeletes();
