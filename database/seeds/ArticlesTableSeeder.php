@@ -8,7 +8,7 @@ class ArticlesTableSeeder extends Seeder
 {
     public function run () {
         $faker = Factory::create();
-        foreach (range(1, 100) as $item) {
+        foreach (range(1, 105) as $item) {
             $article = new Article();
             $article->user_id = rand(1, 20);
             $article->slug = str_slug(implode(' ', $faker->unique()->words(6)));
