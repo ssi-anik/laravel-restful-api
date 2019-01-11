@@ -11,8 +11,8 @@ class TagsTableSeeder extends Seeder
 
         foreach (range(1, 30) as $item) {
             $tag = new Tag();
-            $tag->user_id = rand(1, 20);
-            $tag->content = $faker->word;
+            $tag->user_id = rand(5, 20);
+            $tag->content = $faker->unique()->word;
             $tag->save();
         }
     }
